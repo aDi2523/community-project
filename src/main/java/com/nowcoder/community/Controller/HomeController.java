@@ -21,6 +21,8 @@ import java.util.Map;
 @Controller
 public class HomeController {
     //开发视图层
+
+    //提交测试
     @Autowired
     private DiscussPostService discussPostService;
 
