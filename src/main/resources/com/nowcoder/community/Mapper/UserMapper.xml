@@ -38,6 +38,10 @@
         update community.user set status = #{status} where id = #{id}
     </update>
 
+    <update id="updateHeader">
+        update community.user set header_url = #{headerUrl} where id = #{userId}
+    </update>
+
 
 
 
