@@ -4,6 +4,7 @@ import com.nowcoder.community.Mapper.DiscussPostMapper;
 import com.nowcoder.community.Mapper.LoginTicketMapper;
 import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.LoginTicket;
+import com.nowcoder.community.util.CommunityUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,6 +50,14 @@ public class MapperTest {
         loginTicketMapper.updateStatus(loginTicket.getTicket(), 1);
         loginTicket = loginTicketMapper.selectByTicket("abc");
         System.out.println(loginTicket);
+    }
+
+    @Test
+    public void getMd5(){
+        String code = "123";
+        String salt = "88d3b";
+        System.out.println(CommunityUtil.md5(code + salt));
+
     }
 
 

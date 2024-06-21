@@ -2,10 +2,14 @@ package com.nowcoder.community.Controller;
 
 
 import com.nowcoder.community.Service.UserService;
+import com.nowcoder.community.annotation.LoginRequired;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.util.CommunityUtil;
+import com.nowcoder.community.util.CookieUtil;
 import com.nowcoder.community.util.HostHolder;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,13 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.util.Map;
 
 
 @Controller
@@ -43,12 +45,14 @@ public class UserController {
     @Autowired
     private HostHolder hostHolder;
 
+    @LoginRequired
     @GetMapping("/setting")
     public String getSettingPage(){
         return "/site/setting";
     }
 
     //提供一个方法用以上传头像
+    @LoginRequired
     @PostMapping("/upload")
     public String uploadHeader(MultipartFile headImage, Model model){
         //空值判断
@@ -106,7 +110,52 @@ public class UserController {
         } catch (IOException e) {
             logger.error("读取头像失败！");
         }
-
     }
 
+
+    //提供方法进行修改密码
+    @PostMapping("/passwordModification")
+    public String passwordModification(String oldPassword, String newPassword, String againPassword,
+                                       @CookieValue("ticket") String ticket, Model model){
+            //对传入参数进行判断，不能为空
+            if(StringUtils.isBlank(oldPassword)){
+                model.addAttribute("oldPasswordMsg","请输入原始密码！");
+                return "site/setting";
+            }
+            if(StringUtils.isBlank(newPassword)){
+                model.addAttribute("newPasswordMsg","请输入新密码！");
+                return "site/setting";
+            }
+            if(StringUtils.isBlank(againPassword)){
+                model.addAttribute("againPasswordMsg","请输入确认密码！");
+                return "site/setting";
+            }
+            //首先通过所持有的的用户对象获取当前用户
+            User user = hostHolder.getUser();
+            //判断用户输入的原密码是否与存储的原密码一致
+            //首先对用户输入的原密码进行加密处理
+            oldPassword = CommunityUtil.md5(oldPassword+user.getSalt());
+            if(!oldPassword.equals(user.getPassword())){
+                model.addAttribute("oldPasswordMsg","该密码与原密码不符!");
+                return "site/setting";
+            }
+            //判断新输入密码与原密码是否一致
+            //对新密码进行加密
+            newPassword=CommunityUtil.md5(newPassword+user.getSalt());
+            if(newPassword.equals(user.getPassword())){//判断
+                model.addAttribute("newPasswordMsg","新密码与原密码一致!");
+                return "site/setting";
+            }
+            //对确认密码进行加密
+            againPassword=CommunityUtil.md5(againPassword+user.getSalt());
+            if(!newPassword.equals(againPassword)){//判断
+                model.addAttribute("againPasswordMsg","两次密码不一致!");
+                return "site/setting";
+            }
+            userService.updatePassword(user.getId(), newPassword);
+            //修改密码后，用户需要重新登陆，所以在本次持有中释放用户
+            userService.logout(ticket);
+            return "redirect:/login";
+        }
 }
+

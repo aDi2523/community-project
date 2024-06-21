@@ -17,4 +17,6 @@ public interface UserMapper {
     int updateStatus(int id, int status);
 
     int updateHeader(int userId, String headerUrl);
+
+    int updatePassword(int userId, String newPassword);
 }

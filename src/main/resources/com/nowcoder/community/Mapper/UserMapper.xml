@@ -42,6 +42,10 @@
         update community.user set header_url = #{headerUrl} where id = #{userId}
     </update>
 
+    <update id="updatePassword">
+        update community.user set password = #{newPassword} where id = #{userId}
+    </update>
+
 
 
 
