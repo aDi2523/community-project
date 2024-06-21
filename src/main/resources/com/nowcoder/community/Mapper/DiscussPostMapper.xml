@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nowcoder.community.Mapper.DiscussPostMapper">
 
-    <sql id="selcetFields">
+    <sql id="selectFields">
         id
         , user_id, title, content, type, status, create_time, comment_count, score
     </sql>
@@ -15,7 +15,7 @@
 
     <select id="selectDiscussPosts" resultType="com.nowcoder.community.entity.DiscussPost">
         select
-        <include refid="selcetFields"></include>
+        <include refid="selectFields"></include>
         from community.discuss_post
         where status != 2
         <if test="userId != 0">
@@ -38,6 +38,12 @@
         insert into community.discuss_post (<include refid="insertFields"></include>)
         values(#{userId}, #{title}, #{content}, #{type}, #{status}, #{createTime}, #{commentCount}, #{score})
     </insert>
+
+    <select id="selectDiscussPostById" resultType="DiscussPost">
+        select <include refid="selectFields"></include>
+        from community.discuss_post
+        where id = #{id}
+    </select>
 
 
 </mapper>
