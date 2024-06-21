@@ -144,9 +144,6 @@ public class SensitiveFilter {
     }
 
 
-
-
-
     //定义一个内部类来作为节点
     private class TrieNode{
         //关键词结束标识，默认为false
