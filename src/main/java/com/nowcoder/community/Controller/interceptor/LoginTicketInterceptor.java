@@ -39,6 +39,11 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
                 //在本次请求中持有用户
                 hostHolder.setUser(user);
             }
+            if(loginTicket != null && !(loginTicket.getExpired().after(new Date()))){
+                //超过了有效时间，需要将登录凭证的状态改为无效
+                //凭证有效，获取user
+                userService.logout(ticket);
+            }
         }
 
         return true;

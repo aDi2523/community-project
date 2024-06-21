@@ -116,7 +116,7 @@ public class LoginController implements CommunityConstant {
 
         //交给业务层来验证账号密码
         long expiredSeconds = rememberme ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
-        Map<String, Object> map = userService.login(username, password, expiredSeconds);
+        Map<String, Object> map = userService.login(username, password, expiredSeconds * 1000);
         if(map.containsKey("ticket")){
             //返回的map键为ticket的话，说明登录成功
             Cookie cookie = new Cookie("ticket", map.get("ticket").toString());
