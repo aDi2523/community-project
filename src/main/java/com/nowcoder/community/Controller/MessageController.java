@@ -5,6 +5,7 @@ import com.nowcoder.community.Service.UserService;
 import com.nowcoder.community.entity.Message;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
+import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -12,11 +13,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class MessageController {
@@ -99,7 +99,59 @@ public class MessageController {
         User target = getTarget(conversationId);
         model.addAttribute("target", target);
 
+        //这里如果点开了私信详情了，说明读取了私信
+        //需要变更私信的状态为已读
+        //还要记得判断空值
+        List<Integer> ids = getIdList(letterList);
+        if(!(ids.isEmpty())){
+            messageService.readMessage(ids);
+        }
+
         return "/site/letter-detail";
+    }
+
+    //定义方法来发送消息
+    @PostMapping("/letter/send")
+    @ResponseBody
+    public String senletter(String toName, String content){
+        User toUser = userService.findUserByName(toName);
+        if(toUser == null){
+            return CommunityUtil.getJSONString(1,"目标用户不存在！");
+        }
+        Message message = new Message();
+        int fromId = hostHolder.getUser().getId();
+        message.setFromId(fromId);
+        int toId = toUser.getId();
+        message.setToId(toId);
+        //组成conversationId
+        String conversationId = "";
+        if(fromId > toId){
+            conversationId = toId + "_" + fromId;
+        }else{
+            conversationId = fromId + "_" + toId;
+        }
+        message.setConversationId(conversationId);
+        message.setContent(content);
+        message.setCreateTime(new Date());
+
+        messageService.addMessage(message);
+        return CommunityUtil.getJSONString(0);
+    }
+
+
+    //定义一个方法从List<Message>中获取这个列表的Message的ID
+    public List<Integer> getIdList(List<Message> letterList){
+        List<Integer> ids = new ArrayList<>();
+        if(letterList != null){
+            for(Message message : letterList){
+                if(message.getToId() == hostHolder.getUser().getId() && message.getStatus() == 0){
+                    //如果该条私信的接收方是现在登录的用户
+                    //且该条私信的状态为未读的话，就将该私信的id存入集合中
+                    ids.add(message.getId());
+                }
+            }
+        }
+        return ids;
     }
 
     //定义一个方法用来获取对话用户
