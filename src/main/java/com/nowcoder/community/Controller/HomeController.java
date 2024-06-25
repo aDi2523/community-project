@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +48,14 @@ public class HomeController {
         }
         model.addAttribute("discussPosts", discussPosts);
         return "/index";
+    }
+
+
+    //手动重定向到500的界面
+    //增加请求的处理
+    @GetMapping("/error")
+    public String getErrorPage(){
+        return "/error/500";
     }
 
 }
