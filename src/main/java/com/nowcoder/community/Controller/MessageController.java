@@ -113,7 +113,7 @@ public class MessageController {
     //定义方法来发送消息
     @PostMapping("/letter/send")
     @ResponseBody
-    public String senletter(String toName, String content){
+    public String sendLetter(String toName, String content){
         User toUser = userService.findUserByName(toName);
         if(toUser == null){
             return CommunityUtil.getJSONString(1,"目标用户不存在！");
