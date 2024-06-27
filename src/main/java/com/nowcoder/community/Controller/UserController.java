@@ -1,12 +1,14 @@
 package com.nowcoder.community.Controller;
 
 
+import com.nowcoder.community.Service.LikeService;
 import com.nowcoder.community.Service.UserService;
 import com.nowcoder.community.annotation.LoginRequired;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.CookieUtil;
 import com.nowcoder.community.util.HostHolder;
+import com.nowcoder.community.util.RedisKeyUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -45,18 +47,21 @@ public class UserController {
     @Autowired
     private HostHolder hostHolder;
 
+    @Autowired
+    private LikeService likeService;
+
     @LoginRequired
     @GetMapping("/setting")
-    public String getSettingPage(){
+    public String getSettingPage() {
         return "/site/setting";
     }
 
     //提供一个方法用以上传头像
     @LoginRequired
     @PostMapping("/upload")
-    public String uploadHeader(MultipartFile headImage, Model model){
+    public String uploadHeader(MultipartFile headImage, Model model) {
         //空值判断
-        if(headImage == null){
+        if (headImage == null) {
             model.addAttribute("error", "您还没有上传图片！");
             return "/site/setting";
         }
@@ -66,8 +71,8 @@ public class UserController {
         //分割得到文件的后缀名
         String suffix = fileName.substring(fileName.lastIndexOf("."));
         //判断文件是否有后缀名
-        if(StringUtils.isBlank(suffix)){
-            model.addAttribute("error","文件格式有误！");
+        if (StringUtils.isBlank(suffix)) {
+            model.addAttribute("error", "文件格式有误！");
             return "/site/setting";
         }
 
@@ -80,13 +85,13 @@ public class UserController {
             headImage.transferTo(dest);
         } catch (IOException e) {
             logger.error("上传文件失败" + e.getMessage());
-           throw new RuntimeException("上传文件失败，服务器发生异常", e);
+            throw new RuntimeException("上传文件失败，服务器发生异常", e);
         }
 
         // 更新当前用户的头像的路径(web访问路径)
         // http://localhost:8080/community/user/header/xxx.png
         User user = hostHolder.getUser();
-        String headUrl = domain + contextPath +"/user/header/" + fileName;
+        String headUrl = domain + contextPath + "/user/header/" + fileName;
         userService.updateHeader(user.getId(), headUrl);
 
         return "redirect:/index";
@@ -94,7 +99,7 @@ public class UserController {
 
     //提供一个外界获取头像的方法
     @GetMapping("/header/{fileName}")
-    public void getHeader(@PathVariable("fileName") String fileName, HttpServletResponse response){
+    public void getHeader(@PathVariable("fileName") String fileName, HttpServletResponse response) {
         //文件存放位置
         fileName = uploadPath + "/" + fileName;
         String suffix = fileName.substring(fileName.lastIndexOf("."));
@@ -104,7 +109,7 @@ public class UserController {
              OutputStream os = response.getOutputStream()) {
             int len;
             byte[] buffer = new byte[1024];
-            while((len = fis.read(buffer)) != -1){
+            while ((len = fis.read(buffer)) != -1) {
                 os.write(buffer, 0, len);
             }
         } catch (IOException e) {
@@ -116,46 +121,63 @@ public class UserController {
     //提供方法进行修改密码
     @PostMapping("/passwordModification")
     public String passwordModification(String oldPassword, String newPassword, String againPassword,
-                                       @CookieValue("ticket") String ticket, Model model){
-            //对传入参数进行判断，不能为空
-            if(StringUtils.isBlank(oldPassword)){
-                model.addAttribute("oldPasswordMsg","请输入原始密码！");
-                return "site/setting";
-            }
-            if(StringUtils.isBlank(newPassword)){
-                model.addAttribute("newPasswordMsg","请输入新密码！");
-                return "site/setting";
-            }
-            if(StringUtils.isBlank(againPassword)){
-                model.addAttribute("againPasswordMsg","请输入确认密码！");
-                return "site/setting";
-            }
-            //首先通过所持有的的用户对象获取当前用户
-            User user = hostHolder.getUser();
-            //判断用户输入的原密码是否与存储的原密码一致
-            //首先对用户输入的原密码进行加密处理
-            oldPassword = CommunityUtil.md5(oldPassword+user.getSalt());
-            if(!oldPassword.equals(user.getPassword())){
-                model.addAttribute("oldPasswordMsg","该密码与原密码不符!");
-                return "site/setting";
-            }
-            //判断新输入密码与原密码是否一致
-            //对新密码进行加密
-            newPassword=CommunityUtil.md5(newPassword+user.getSalt());
-            if(newPassword.equals(user.getPassword())){//判断
-                model.addAttribute("newPasswordMsg","新密码与原密码一致!");
-                return "site/setting";
-            }
-            //对确认密码进行加密
-            againPassword=CommunityUtil.md5(againPassword+user.getSalt());
-            if(!newPassword.equals(againPassword)){//判断
-                model.addAttribute("againPasswordMsg","两次密码不一致!");
-                return "site/setting";
-            }
-            userService.updatePassword(user.getId(), newPassword);
-            //修改密码后，用户需要重新登陆，所以在本次持有中释放用户
-            userService.logout(ticket);
-            return "redirect:/login";
+                                       @CookieValue("ticket") String ticket, Model model) {
+        //对传入参数进行判断，不能为空
+        if (StringUtils.isBlank(oldPassword)) {
+            model.addAttribute("oldPasswordMsg", "请输入原始密码！");
+            return "site/setting";
         }
+        if (StringUtils.isBlank(newPassword)) {
+            model.addAttribute("newPasswordMsg", "请输入新密码！");
+            return "site/setting";
+        }
+        if (StringUtils.isBlank(againPassword)) {
+            model.addAttribute("againPasswordMsg", "请输入确认密码！");
+            return "site/setting";
+        }
+        //首先通过所持有的的用户对象获取当前用户
+        User user = hostHolder.getUser();
+        //判断用户输入的原密码是否与存储的原密码一致
+        //首先对用户输入的原密码进行加密处理
+        oldPassword = CommunityUtil.md5(oldPassword + user.getSalt());
+        if (!oldPassword.equals(user.getPassword())) {
+            model.addAttribute("oldPasswordMsg", "该密码与原密码不符!");
+            return "site/setting";
+        }
+        //判断新输入密码与原密码是否一致
+        //对新密码进行加密
+        newPassword = CommunityUtil.md5(newPassword + user.getSalt());
+        if (newPassword.equals(user.getPassword())) {//判断
+            model.addAttribute("newPasswordMsg", "新密码与原密码一致!");
+            return "site/setting";
+        }
+        //对确认密码进行加密
+        againPassword = CommunityUtil.md5(againPassword + user.getSalt());
+        if (!newPassword.equals(againPassword)) {//判断
+            model.addAttribute("againPasswordMsg", "两次密码不一致!");
+            return "site/setting";
+        }
+        userService.updatePassword(user.getId(), newPassword);
+        //修改密码后，用户需要重新登陆，所以在本次持有中释放用户
+        userService.logout(ticket);
+        return "redirect:/login";
+    }
+
+    //提供一个方法来查看主页
+    @GetMapping("/profile/{userId}")
+    public String getProfilePage(@PathVariable("userId") int userId, Model model){
+        User user = userService.findUserById(userId);
+        //防止传入的user为空，被恶意攻击
+        if(user == null){
+            throw new RuntimeException("该用户不存在！");
+        }
+        model.addAttribute("user", user);
+        //以用户为key，查询点赞数量
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
+        return "/site/profile";
+    }
+
+
 }
 
