@@ -1,5 +1,6 @@
 package com.nowcoder.community.Controller;
 
+import com.nowcoder.community.annotation.LoginRequired;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
@@ -24,6 +25,10 @@ public class likeController {
     @ResponseBody
     public String like(int entityType, int entityId, int entityUserId){
         User user = hostHolder.getUser();
+        //判断用户是否登录
+        if(user == null){
+            return CommunityUtil.getJSONString(1,"您还没有登录！请先登录");
+        }
         //进行点赞操作
         likeService.like(user.getId(), entityType, entityId, entityUserId);
 
