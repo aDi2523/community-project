@@ -1,6 +1,8 @@
 package com.nowcoder.community.Controller;
 
 
+import com.nowcoder.community.Service.CommunityConstant;
+import com.nowcoder.community.Service.FollowService;
 import com.nowcoder.community.Service.LikeService;
 import com.nowcoder.community.Service.UserService;
 import com.nowcoder.community.annotation.LoginRequired;
@@ -28,7 +30,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -49,6 +51,9 @@ public class UserController {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
     @LoginRequired
     @GetMapping("/setting")
@@ -175,6 +180,23 @@ public class UserController {
         //以用户为key，查询点赞数量
         int likeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("likeCount", likeCount);
+
+        //统计关注数量、粉丝数量以及当前用户是否已经关注该实体
+        //关注数量
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+        //粉丝数量
+        long followerCount = followService.findFollowerCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followerCount", followerCount);
+        //当前用户是否已经关注该实体
+        //细节：需要先判断当前有没有用户登录
+        boolean hasFollowed = false;
+        if(hostHolder.getUser() != null) {
+            //已经登录了
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), userId, ENTITY_TYPE_USER);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
+
         return "/site/profile";
     }
 
