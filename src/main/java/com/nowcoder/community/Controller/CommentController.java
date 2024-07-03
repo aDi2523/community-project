@@ -49,7 +49,7 @@ public class CommentController implements CommunityConstant {
                 .setUserId(hostHolder.getUser().getId())
                 .setEntityType(comment.getEntityType())
                 .setEntityId(comment.getEntityId())
-                .setData("discussPostId", discussPostId);//额外数据是需要跳转到帖子详情页
+                .setData("postId", discussPostId);//额外数据是需要跳转到帖子详情页
         //根据是评论还是回复，传入不同的entityUserId
         if (comment.getEntityType() == ENTITY_TYPE_POST) {
             int userId = discussPostService.findDiscussPostById(comment.getEntityId()).getUserId();
