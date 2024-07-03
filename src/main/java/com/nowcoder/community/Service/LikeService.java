@@ -20,6 +20,7 @@ public class LikeService {
             public Object execute(RedisOperations operations) throws DataAccessException {
                 String entityLikeKey = RedisKeyUtil.getEntityLikeKey(entityType, entityId);
                 //这里要获取的是被查看人的userid，不是当前登录用户的userid
+                //获取一个用户的总点赞数
                 String userLikeKey = RedisKeyUtil.getUserLikeKey(entityUserId);
 
                 //查询操作不要放在事务内，否则返回结果为空

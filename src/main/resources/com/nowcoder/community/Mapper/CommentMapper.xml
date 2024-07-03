@@ -10,7 +10,8 @@
     </sql>
 
     <sql id="insertFields">
-        user_id, entity_type, entity_id, target_id, content, status, create_time
+        user_id
+        , entity_type, entity_id, target_id, content, status, create_time
     </sql>
 
     <select id="selectCommentsByEntity" resultType="com.nowcoder.community.entity.Comment">
@@ -37,7 +38,12 @@
         values(#{userId}, #{entityType}, #{entityId}, #{targetId}, #{content}, #{status}, #{createTime})
     </insert>
 
-
+    <select id="selectCommentById" resultType="Comment">
+        select
+        <include refid="selectFields"></include>
+        from community.comment
+        where id = #{id}
+    </select>
 
 
 </mapper>
