@@ -63,6 +63,17 @@ public class CommentController implements CommunityConstant {
         }
         eventProducer.fireEvent(event);
 
+        //触发评论事件后，通过kafka存入es服务器
+        //先判断是否是对帖子进行评论，对评论进行回复的不用更改帖子的回复数量
+        if(comment.getEntityType() == ENTITY_TYPE_POST){
+            event = new Event()
+                    .setTopic(TOPIC_PUBLISH)
+                    .setUserId(comment.getUserId())
+                    .setEntityType(ENTITY_TYPE_POST)
+                    .setEntityId(discussPostId);
+            eventProducer.fireEvent(event);
+        }
+
 
         return "redirect:/discuss/detail/" + discussPostId;
     }
