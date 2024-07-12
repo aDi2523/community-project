@@ -68,6 +68,24 @@ public class SecurityConfig implements CommunityConstant {
                                 AUTHORITY_ADMIN,
                                 AUTHORITY_MODERATOR
                         )
+                        .requestMatchers(
+                                //置顶和加精
+                                "/discuss/top",
+                                "/discuss/wonderful"
+                        )
+                        .hasAnyAuthority(
+                                //仅版主可以访问
+                                AUTHORITY_MODERATOR
+                        )
+                        .requestMatchers(
+                                //删帖
+                                "/discuss/delete"
+                        )
+                        .hasAnyAuthority(
+                                //仅管理员和发帖人可以访问
+                                AUTHORITY_ADMIN,
+                                AUTHORITY_USER
+                        )
                         .anyRequest().permitAll()//对于其他路径都可以放行
                 )
                 .csrf(csrf -> csrf.disable());//关闭防csrf攻击
