@@ -85,6 +85,11 @@ public class SecurityConfig implements CommunityConstant {
                                 //仅管理员和发帖人可以访问
                                 AUTHORITY_ADMIN,
                                 AUTHORITY_USER
+                        ).requestMatchers(
+                                "/data/**"
+                        ).hasAnyAuthority(
+                                //统计网站UV和DAU，只有管理员可以访问
+                                AUTHORITY_ADMIN
                         )
                         .anyRequest().permitAll()//对于其他路径都可以放行
                 )
