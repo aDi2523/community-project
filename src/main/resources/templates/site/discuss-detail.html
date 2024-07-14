@@ -74,7 +74,7 @@
 					<button type="button" class="btn btn-danger btn-sm" id="wonderfulBtn"
 							th:disabled="${post.status==1}" sec:authorize="hasAnyAuthority('moderator')">加精</button>
 					<button type="button" class="btn btn-danger btn-sm" id="deleteBtn"
-							th:disabled="${post.status==2}" sec:authorize="hasAnyAuthority('admin','user')" th:if="${loginUser.id==post.userId}">删除</button>
+							th:disabled="${post.status==2}" th:if="${loginUser.id==post.userId} or ${#authorization.expression('hasAnyAuthority(''admin'')')}">删除</button>
 				</div>
 			</h6>
 			<!-- 作者 -->
