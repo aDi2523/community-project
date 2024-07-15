@@ -6,7 +6,9 @@ import com.nowcoder.community.entity.*;
 import com.nowcoder.community.event.EventProducer;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
+import com.nowcoder.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -34,12 +36,15 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private EventProducer eventProducer;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @PostMapping("/add")
     @ResponseBody
-    public String addDiscussPost(String title, String content){
+    public String addDiscussPost(String title, String content) {
         User user = hostHolder.getUser();
-        if(user == null){
-            return CommunityUtil.getJSONString(403,"你还没有登录哦！");
+        if (user == null) {
+            return CommunityUtil.getJSONString(403, "你还没有登录哦！");
         }
 
         DiscussPost discussPost = new DiscussPost();
@@ -58,13 +63,16 @@ public class DiscussPostController implements CommunityConstant {
                 .setEntityUserID(discussPost.getUserId());
         eventProducer.fireEvent(event);
 
+        //增加帖子之后，计算分数并将帖子id存入redis中
+        String postRedisKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(postRedisKey, discussPost.getId());
 
         //报错的情况统一处理
-        return CommunityUtil.getJSONString(0,"发布成功！");
+        return CommunityUtil.getJSONString(0, "发布成功！");
     }
 
     @GetMapping("/detail/{discussPostId}")
-    public String getDiscussPost(@PathVariable("discussPostId") int discussPostId, Model model, Page page){
+    public String getDiscussPost(@PathVariable("discussPostId") int discussPostId, Model model, Page page) {
         //帖子
         DiscussPost post = discussPostService.findDiscussPostById(discussPostId);
         model.addAttribute("post", post);
@@ -77,7 +85,7 @@ public class DiscussPostController implements CommunityConstant {
         //点赞状态
         //细节：判断当前用户是否已经登录了，没有登录要直接返回0，表示没有点赞
         int likeStatus = hostHolder.getUser() == null ? 0 :
-                likeService.findEntityLikeStatus(hostHolder.getUser().getId(),ENTITY_TYPE_POST, post.getId());
+                likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ENTITY_TYPE_POST, post.getId());
         model.addAttribute("likeStatus", likeStatus);
 
         //评论分页信息
@@ -94,8 +102,8 @@ public class DiscussPostController implements CommunityConstant {
         //Vo指View Object，即显示的对象
         //评论VO列表
         List<Map<String, Object>> commentVoList = new ArrayList<>();
-        if(commentList != null){
-            for(Comment comment : commentList){
+        if (commentList != null) {
+            for (Comment comment : commentList) {
                 //评论vo
                 Map<String, Object> commentVo = new HashMap<>();
                 //评论
@@ -108,7 +116,7 @@ public class DiscussPostController implements CommunityConstant {
                 //点赞状态
                 //细节：判断当前用户是否已经登录了，没有登录要直接返回0，表示没有点赞
                 likeStatus = hostHolder.getUser() == null ? 0 :
-                        likeService.findEntityLikeStatus(hostHolder.getUser().getId(),ENTITY_TYPE_COMMENT, comment.getId());
+                        likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ENTITY_TYPE_COMMENT, comment.getId());
                 commentVo.put("likeStatus", likeStatus);
 
                 //每条评论的回复列表
@@ -116,8 +124,8 @@ public class DiscussPostController implements CommunityConstant {
                         ENTITY_TYPE_COMMENT, comment.getId(), 0, Integer.MAX_VALUE);
                 //回复vo列表
                 List<Map<String, Object>> replyVoList = new ArrayList<>();
-                if(replyList != null){
-                    for(Comment reply: replyList){
+                if (replyList != null) {
+                    for (Comment reply : replyList) {
                         Map<String, Object> replyVo = new HashMap<>();
                         //回复
                         replyVo.put("reply", reply);
@@ -129,12 +137,12 @@ public class DiscussPostController implements CommunityConstant {
                         //点赞状态
                         //细节：判断当前用户是否已经登录了，没有登录要直接返回0，表示没有点赞
                         likeStatus = hostHolder.getUser() == null ? 0 :
-                                likeService.findEntityLikeStatus(hostHolder.getUser().getId(),ENTITY_TYPE_COMMENT, reply.getId());
+                                likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ENTITY_TYPE_COMMENT, reply.getId());
                         replyVo.put("likeStatus", likeStatus);
 
                         //回复的目标
                         //需要先判断是否有回复的目标
-                        User taget = reply.getTargetId() == 0? null : userService.findUserById(reply.getTargetId());
+                        User taget = reply.getTargetId() == 0 ? null : userService.findUserById(reply.getTargetId());
                         replyVo.put("target", taget);
                         replyVoList.add(replyVo);
                     }
@@ -153,14 +161,14 @@ public class DiscussPostController implements CommunityConstant {
 
         model.addAttribute("comments", commentVoList);
 
-        return"/site/discuss-detail";
+        return "/site/discuss-detail";
     }
 
 
     //进行置顶操作
     @PostMapping("/top")
     @ResponseBody
-    public String setTop(int id){
+    public String setTop(int id) {
         //更新数据库
         discussPostService.updateType(id, 1);
 
@@ -178,7 +186,7 @@ public class DiscussPostController implements CommunityConstant {
     //进行加精操作
     @PostMapping("/wonderful")
     @ResponseBody
-    public String setWonderful(int id){
+    public String setWonderful(int id) {
         //更新数据库
         discussPostService.updateStatus(id, 1);
 
@@ -190,13 +198,17 @@ public class DiscussPostController implements CommunityConstant {
                 .setEntityId(id);
         eventProducer.fireEvent(event);
 
+        //对帖子进行加精，计算分数并将帖子id存入redis中
+        String postRedisKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(postRedisKey, id);
+
         return CommunityUtil.getJSONString(0);
     }
 
     //进行删帖操作
     @PostMapping("/delete")
     @ResponseBody
-    public String setDelete(int id){
+    public String setDelete(int id) {
         //更新数据库
         discussPostService.updateStatus(id, 2);
 

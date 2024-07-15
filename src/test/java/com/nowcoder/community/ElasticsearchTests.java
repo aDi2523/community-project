@@ -40,44 +40,44 @@ public class ElasticsearchTests {
     private ElasticsearchClient elasticsearchClient;
 
     @Test
-    public void testInsert(){
+    public void testInsert() {
         System.out.println(elasticsearchTemplate.save(discussPostMapper.selectDiscussPostById(241)));
         System.out.println(repository.save(discussPostMapper.selectDiscussPostById(241)));
     }
 
     @Test
-    public void testInsertList(){
-        repository.saveAll(discussPostMapper.selectDiscussPosts(101,0,100));
-        repository.saveAll(discussPostMapper.selectDiscussPosts(102,0,100));
-        repository.saveAll(discussPostMapper.selectDiscussPosts(103,0,100));
-        repository.saveAll(discussPostMapper.selectDiscussPosts(111,0,100));
-        repository.saveAll(discussPostMapper.selectDiscussPosts(112,0,100));
-        repository.saveAll(discussPostMapper.selectDiscussPosts(131,0,100));
-        repository.saveAll(discussPostMapper.selectDiscussPosts(132,0,100));
-        repository.saveAll(discussPostMapper.selectDiscussPosts(133,0,100));
-        repository.saveAll(discussPostMapper.selectDiscussPosts(134,0,100));
-        repository.saveAll(discussPostMapper.selectDiscussPosts(152,0,100));
+    public void testInsertList() {
+        repository.saveAll(discussPostMapper.selectDiscussPosts(101, 0, 100, 0));
+        repository.saveAll(discussPostMapper.selectDiscussPosts(102, 0, 100, 0));
+        repository.saveAll(discussPostMapper.selectDiscussPosts(103, 0, 100, 0));
+        repository.saveAll(discussPostMapper.selectDiscussPosts(111, 0, 100, 0));
+        repository.saveAll(discussPostMapper.selectDiscussPosts(112, 0, 100, 0));
+        repository.saveAll(discussPostMapper.selectDiscussPosts(131, 0, 100, 0));
+        repository.saveAll(discussPostMapper.selectDiscussPosts(132, 0, 100, 0));
+        repository.saveAll(discussPostMapper.selectDiscussPosts(133, 0, 100, 0));
+        repository.saveAll(discussPostMapper.selectDiscussPosts(134, 0, 100, 0));
+        repository.saveAll(discussPostMapper.selectDiscussPosts(152, 0, 100, 0));
     }
 
     @Test
-    public void testUpdate(){
+    public void testUpdate() {
         DiscussPost post = discussPostMapper.selectDiscussPostById(231);
         post.setContent("我是新人，基尼太美。");
         repository.save(post);
     }
 
     @Test
-    public void testDeleteById(){
+    public void testDeleteById() {
         repository.deleteById(231);
     }
 
     @Test
-    public void testDeleteAll(){
+    public void testDeleteAll() {
         repository.deleteAll();
     }
 
     @Test
-    public void findByQuery(){
+    public void findByQuery() {
 
     }
 

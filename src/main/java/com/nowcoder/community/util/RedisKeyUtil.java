@@ -13,6 +13,7 @@ public class RedisKeyUtil {
     private static final String PREFIX_USER = "user";
     private static final String PREFIX_UV = "uv";
     private static final String PREFIX_DAU = "dau";
+    private static final String PREFIX_POST = "post";
 
 
     //定义一个方法用来生成redis的key
@@ -73,5 +74,11 @@ public class RedisKeyUtil {
     //拼区间活跃用户的键
     public static String getDAUKey(String startDate, String endDate) {
         return PREFIX_DAU + SPLIT + startDate + SPLIT + endDate;
+    }
+
+    //拼帖子的键
+    public static String getPostScoreKey() {
+        //不需要传入参数，把所有修改的帖子放在一个set里面进行修改即可
+        return PREFIX_POST + SPLIT + "score";
     }
 }

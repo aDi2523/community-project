@@ -18,16 +18,16 @@ public class DiscussPostService {
     @Autowired
     private SensitiveFilter sensitiveFilter;
 
-    public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit){
-        return discussPostMapper.selectDiscussPosts(userId,offset,limit);
+    public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit, int orderMode) {
+        return discussPostMapper.selectDiscussPosts(userId, offset, limit, orderMode);
     }
 
-    public Integer findDiscussPostRows(int userId){
+    public Integer findDiscussPostRows(int userId) {
         return discussPostMapper.selectDiscussPostRows(userId);
     }
 
-    public int addDiscussPost(DiscussPost post){
-        if(post == null){
+    public int addDiscussPost(DiscussPost post) {
+        if (post == null) {
             throw new IllegalArgumentException("参数不能为空！");
         }
 
@@ -41,22 +41,27 @@ public class DiscussPostService {
         return discussPostMapper.insertDiscussPost(post);
     }
 
-    public DiscussPost findDiscussPostById(int id){
+    public DiscussPost findDiscussPostById(int id) {
         return discussPostMapper.selectDiscussPostById(id);
     }
 
-    public int updateCommentCount(int commentCount, int id){
+    public int updateCommentCount(int commentCount, int id) {
         return discussPostMapper.updateCommentCount(commentCount, id);
     }
 
     //更新类型
-    public int updateType(int id, int type){
+    public int updateType(int id, int type) {
         return discussPostMapper.updateType(id, type);
     }
 
     //更新状态
-    public int updateStatus(int id, int status){
+    public int updateStatus(int id, int status) {
         return discussPostMapper.updateStatus(id, status);
+    }
+
+    //更新帖子分数
+    public int updateScore(int id, double score) {
+        return discussPostMapper.updateScore(id, score);
     }
 
 

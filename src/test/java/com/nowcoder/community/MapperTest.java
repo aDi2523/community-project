@@ -21,9 +21,9 @@ public class MapperTest {
     private LoginTicketMapper loginTicketMapper;
 
     @Test
-    public void testSelectPosts(){
-        List<DiscussPost> list = discussPostMapper.selectDiscussPosts(0, 0, 10);
-        for(DiscussPost post: list){
+    public void testSelectPosts() {
+        List<DiscussPost> list = discussPostMapper.selectDiscussPosts(0, 0, 10, 0);
+        for (DiscussPost post : list) {
             System.out.println(post);
         }
 
@@ -32,7 +32,7 @@ public class MapperTest {
     }
 
     @Test
-    public void testInsertLoginTicket(){
+    public void testInsertLoginTicket() {
         LoginTicket loginTicket = new LoginTicket();
         loginTicket.setUserId(101);
         loginTicket.setTicket("abc");
@@ -44,7 +44,7 @@ public class MapperTest {
     }
 
     @Test
-    public void testSelectLoginTicket(){
+    public void testSelectLoginTicket() {
         LoginTicket loginTicket = loginTicketMapper.selectByTicket("abc");
         System.out.println(loginTicket);
         loginTicketMapper.updateStatus(loginTicket.getTicket(), 1);
@@ -53,7 +53,7 @@ public class MapperTest {
     }
 
     @Test
-    public void getMd5(){
+    public void getMd5() {
         String code = "123";
         String salt = "88d3b";
         System.out.println(CommunityUtil.md5(code + salt));
