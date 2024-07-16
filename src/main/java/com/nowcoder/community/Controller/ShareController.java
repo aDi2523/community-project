@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -32,6 +31,12 @@ public class ShareController implements CommunityConstant {
 
     @Value("${wk.image.storage}")
     private String wkImageStorage;
+
+    @Value("${qiniu.bucket.share.name}")
+    private String shareBucketName;
+
+    @Value("${qiniu.bucket.share.url}")
+    private String shareBucketUrl;
 
     @Autowired
     private EventProducer eventProducer;
@@ -55,11 +60,14 @@ public class ShareController implements CommunityConstant {
 
         // 返回访问路径
         Map<String, Object> map = new HashMap<>();
-        String url = pathDomain + contextPath + "/share/image/" + fileName;
+        //String url = pathDomain + contextPath + "/share/image/" + fileName;
+        String url = shareBucketUrl + "/" + fileName;
         map.put("shareUrl", url);
         return CommunityUtil.getJSONString(0, null, map);
     }
 
+
+    //废弃，直接从七牛云返回图片
     //提供方法来获取长图
     @GetMapping("/share/image/{fileName}")
     public void getShareImage(@PathVariable("fileName") String fileName, HttpServletResponse response) {

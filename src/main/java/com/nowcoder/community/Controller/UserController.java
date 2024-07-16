@@ -11,6 +11,8 @@ import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.CookieUtil;
 import com.nowcoder.community.util.HostHolder;
 import com.nowcoder.community.util.RedisKeyUtil;
+import com.qiniu.util.Auth;
+import com.qiniu.util.StringMap;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -43,6 +45,18 @@ public class UserController implements CommunityConstant {
     @Value("${server.servlet.context-path}")
     private String contextPath;
 
+    @Value("${qiniu.key.access}")
+    private String accessKey;
+
+    @Value("${qiniu.key.secret}")
+    private String secretKey;
+
+    @Value("${qiniu.bucket.header.name}")
+    private String headerNameBucket;
+
+    @Value("${qiniu.bucket.header.url}")
+    private String headerBucketUrl;
+
     @Autowired
     private UserService userService;
 
@@ -57,10 +71,39 @@ public class UserController implements CommunityConstant {
 
     @LoginRequired
     @GetMapping("/setting")
-    public String getSettingPage() {
+    public String getSettingPage(Model model) {
+        //获取上传文件名称
+        String fileName = CommunityUtil.generateUUID();
+        //设置响应信息
+        StringMap policy = new StringMap();
+        policy.put("returnBody", CommunityUtil.getJSONString(0));
+        //生成上传对象
+        Auth auth = Auth.create(accessKey, secretKey);
+        String uploadToken = auth.uploadToken(headerNameBucket, fileName, 3600, policy);//3600s
+
+        model.addAttribute("uploadToken", uploadToken);
+        model.addAttribute("fileName", fileName);
+
         return "/site/setting";
+
     }
 
+    //提供方法来更新数据库中存储在七牛云的头像路径
+    @PostMapping("/header/url")
+    @ResponseBody
+    public String updateHeaderUrl(String fileName) {
+        if (StringUtils.isBlank(fileName)) {
+            return CommunityUtil.getJSONString(1, "文件名不能为空！");
+        }
+
+        String url = headerBucketUrl + "/" + fileName;
+        userService.updateHeader(hostHolder.getUser().getId(), url);
+
+        return CommunityUtil.getJSONString(0);
+    }
+
+
+    //废弃
     //提供一个方法用以上传头像
     @LoginRequired
     @PostMapping("/upload")
@@ -102,6 +145,8 @@ public class UserController implements CommunityConstant {
         return "redirect:/index";
     }
 
+
+    //废弃
     //提供一个外界获取头像的方法
     @GetMapping("/header/{fileName}")
     public void getHeader(@PathVariable("fileName") String fileName, HttpServletResponse response) {
@@ -170,10 +215,10 @@ public class UserController implements CommunityConstant {
 
     //提供一个方法来查看主页
     @GetMapping("/profile/{userId}")
-    public String getProfilePage(@PathVariable("userId") int userId, Model model){
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
         User user = userService.findUserById(userId);
         //防止传入的user为空，被恶意攻击
-        if(user == null){
+        if (user == null) {
             throw new RuntimeException("该用户不存在！");
         }
         model.addAttribute("user", user);
@@ -191,7 +236,7 @@ public class UserController implements CommunityConstant {
         //当前用户是否已经关注该实体
         //细节：需要先判断当前有没有用户登录
         boolean hasFollowed = false;
-        if(hostHolder.getUser() != null) {
+        if (hostHolder.getUser() != null) {
             //已经登录了
             hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), userId, ENTITY_TYPE_USER);
         }
