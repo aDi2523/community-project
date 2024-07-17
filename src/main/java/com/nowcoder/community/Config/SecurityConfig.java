@@ -27,14 +27,14 @@ import java.io.PrintWriter;
 public class SecurityConfig implements CommunityConstant {
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer(){
+    public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.ignoring().requestMatchers("/resources/**");
     }
 
     // 在SecurityConfig中增加配置SecurityContextRepository
     // 便于手动保存SecurityContext到SecurityContextRepository中，进行持久化认证
     @Bean
-    public SecurityContextRepository securityContextRepository(){
+    public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
     }
 
@@ -86,7 +86,8 @@ public class SecurityConfig implements CommunityConstant {
                                 AUTHORITY_ADMIN,
                                 AUTHORITY_USER
                         ).requestMatchers(
-                                "/data/**"
+                                "/data/**",
+                                "/actuator/**"
                         ).hasAnyAuthority(
                                 //统计网站UV和DAU，只有管理员可以访问
                                 AUTHORITY_ADMIN

@@ -68,7 +68,7 @@ public class DiscussPostService {
                     }
                 });
 
-        //出事阿虎帖子总数缓存
+        //初始化帖子总数缓存
         postRowsCache = Caffeine.newBuilder()
                 .maximumSize(maxSize)
                 .expireAfterWrite(expireSeconds, TimeUnit.SECONDS)
