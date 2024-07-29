@@ -1,6 +1,6 @@
 package com.nowcoder.community.quartz;
 
-import com.nowcoder.community.Service.CommunityConstant;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.Service.DiscussPostService;
 import com.nowcoder.community.Service.ElasticsearchService;
 import com.nowcoder.community.Service.LikeService;

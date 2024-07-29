@@ -1,6 +1,6 @@
 package com.nowcoder.community.Controller;
 
-import com.nowcoder.community.Service.CommunityConstant;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.entity.Event;
 import com.nowcoder.community.event.EventProducer;
 import com.nowcoder.community.util.CommunityUtil;

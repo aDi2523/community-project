@@ -1,8 +1,6 @@
 package com.nowcoder.community.Controller;
 
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.core.search.Hit;
-import com.nowcoder.community.Service.CommunityConstant;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.Service.ElasticsearchService;
 import com.nowcoder.community.Service.LikeService;
 import com.nowcoder.community.Service.UserService;

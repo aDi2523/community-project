@@ -1,6 +1,7 @@
 package com.nowcoder.community.Service;
 
 import com.nowcoder.community.entity.User;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class FollowService implements CommunityConstant{
+public class FollowService implements CommunityConstant {
     @Autowired
     private RedisTemplate redisTemplate;
 

@@ -2,6 +2,7 @@ package com.nowcoder.community.Service;
 
 import com.nowcoder.community.Mapper.CommentMapper;
 import com.nowcoder.community.entity.Comment;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import org.springframework.web.util.HtmlUtils;
 import java.util.List;
 
 @Service
-public class CommentService implements CommunityConstant{
+public class CommentService implements CommunityConstant {
 
     @Autowired
     private CommentMapper commentMapper;

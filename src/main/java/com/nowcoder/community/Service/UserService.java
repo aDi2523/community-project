@@ -3,6 +3,7 @@ package com.nowcoder.community.Service;
 import com.nowcoder.community.Mapper.UserMapper;
 import com.nowcoder.community.entity.LoginTicket;
 import com.nowcoder.community.entity.User;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.MailClient;
 import com.nowcoder.community.util.RedisKeyUtil;

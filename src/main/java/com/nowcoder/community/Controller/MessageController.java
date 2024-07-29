@@ -1,7 +1,7 @@
 package com.nowcoder.community.Controller;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.nowcoder.community.Service.CommunityConstant;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.Service.MessageService;
 import com.nowcoder.community.Service.UserService;
 import com.nowcoder.community.entity.Message;

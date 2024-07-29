@@ -1,21 +1,17 @@
 package com.nowcoder.community.Controller;
 
 
-import com.nowcoder.community.Service.CommunityConstant;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.Service.FollowService;
 import com.nowcoder.community.Service.LikeService;
 import com.nowcoder.community.Service.UserService;
 import com.nowcoder.community.annotation.LoginRequired;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.util.CommunityUtil;
-import com.nowcoder.community.util.CookieUtil;
 import com.nowcoder.community.util.HostHolder;
-import com.nowcoder.community.util.RedisKeyUtil;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.Map;
 
 
 @Controller

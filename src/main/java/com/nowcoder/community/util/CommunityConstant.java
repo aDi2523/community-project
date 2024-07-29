@@ -1,4 +1,4 @@
-package com.nowcoder.community.Service;
+package com.nowcoder.community.util;
 
 //设置激活状态的常量码
 public interface CommunityConstant {
